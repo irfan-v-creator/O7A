@@ -1,0 +1,6 @@
+{
+  "name": "O7A EV Platform",
+  "description": "EV scooter spare parts discovery, vehicle garage, service center appointments, and inventory management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

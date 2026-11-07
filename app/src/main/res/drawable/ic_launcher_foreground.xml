@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer Cyan Ring -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:pathData="M32,32 A32,32 0 1,1 76,76" />
+    <!-- Electric Scooter Silhouette / Front Cowl and Handlebar -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,44 L70,44 L66,50 L42,50 Z" />
+    <!-- Scooter Headlight (O7A Halo Light) -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2.5"
+        android:fillColor="#00E5FF"
+        android:pathData="M46,55 A8,4 0 1,0 62,55 A8,4 0 1,0 46,55 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,55 A6,2.5 0 1,0 60,55 A6,2.5 0 1,0 48,55 Z" />
+    <!-- Scooter Stem and Front Wheel -->
+    <path
+        android:strokeColor="#94A3B8"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:pathData="M54,58 L54,72" />
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="4"
+        android:fillColor="#0B132B"
+        android:pathData="M54,72 A9,9 0 1,0 54,90 A9,9 0 1,0 54,72 Z" />
+    <!-- Lightning Bolt Accent across badge -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M66,30 L55,46 L62,46 L50,65 L55,49 L48,49 Z" />
+</vector>
