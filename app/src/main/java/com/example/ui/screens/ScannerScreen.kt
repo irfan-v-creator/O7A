@@ -1,5 +1,8 @@
 package com.example.ui.screens
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -26,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ElectricScooter
 import androidx.compose.material.icons.filled.QrCode
@@ -79,6 +83,13 @@ fun ScannerScreen(
 ) {
     val scrollState = rememberScrollState()
     var manualCodeInput by remember { mutableStateOf("") }
+    var cameraPermissionGranted by remember { mutableStateOf(false) }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        cameraPermissionGranted = isGranted
+    }
 
     val infiniteTransition = rememberInfiniteTransition(label = "scanner_laser")
     val laserYRatio by infiniteTransition.animateFloat(
@@ -111,8 +122,27 @@ fun ScannerScreen(
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = O7ATextPrimary,
-            modifier = Modifier.padding(top = 2.dp, bottom = 12.dp)
+            modifier = Modifier.padding(top = 2.dp, bottom = 8.dp)
         )
+
+        Button(
+            onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (cameraPermissionGranted) O7ASuccessGreen else O7AElectricBlue
+            ),
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier
+                .padding(bottom = 12.dp)
+                .testTag("camera_permission_scan_btn")
+        ) {
+            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = if (cameraPermissionGranted) "Camera Permission Active (Live)" else "Request Camera Hardware Scanner",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
         // Viewfinder HUD Box
         Box(
@@ -120,14 +150,14 @@ fun ScannerScreen(
                 .size(240.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(Color.Black.copy(alpha = 0.6f))
-                .border(2.dp, O7ACyanGlow, RoundedCornerShape(20.dp)),
+                .border(2.dp, if (cameraPermissionGranted) O7ASuccessGreen else O7ACyanGlow, RoundedCornerShape(20.dp)),
             contentAlignment = Alignment.Center
         ) {
             // Laser Scan Line Animation
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val laserY = size.height * laserYRatio
                 drawLine(
-                    color = O7ACyanGlow,
+                    color = if (cameraPermissionGranted) O7ASuccessGreen else O7ACyanGlow,
                     start = Offset(20f, laserY),
                     end = Offset(size.width - 20f, laserY),
                     strokeWidth = 4f
@@ -138,14 +168,15 @@ fun ScannerScreen(
                 Icon(
                     imageVector = Icons.Default.QrCodeScanner,
                     contentDescription = null,
-                    tint = O7ACyanGlow.copy(alpha = 0.4f),
+                    tint = if (cameraPermissionGranted) O7ASuccessGreen else O7ACyanGlow.copy(alpha = 0.6f),
                     modifier = Modifier.size(72.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Align barcode within frame",
+                    text = if (cameraPermissionGranted) "Live Camera Active • Point at Part" else "Align barcode within frame",
                     fontSize = 12.sp,
-                    color = O7ATextSecondary
+                    color = if (cameraPermissionGranted) O7ASuccessGreen else O7ATextSecondary,
+                    fontWeight = if (cameraPermissionGranted) FontWeight.Bold else FontWeight.Normal
                 )
             }
         }

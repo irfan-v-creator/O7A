@@ -32,6 +32,7 @@ import com.example.ui.screens.CustomerHubScreen
 import com.example.ui.screens.CustomerProfileScreen
 import com.example.ui.screens.DemoVideoScreen
 import com.example.ui.screens.MainHubScreen
+import com.example.ui.screens.MediaAndZipToolsScreen
 import com.example.ui.screens.MonitoringOptionsScreen
 import com.example.ui.screens.OrderHistoryScreen
 import com.example.ui.screens.OrderSuccessScreen
@@ -272,6 +273,10 @@ fun O7AApp(viewModel: EVPlatformViewModel = viewModel()) {
                         },
                         onToggleLogin = { viewModel.toggleUserLogin() }
                     )
+                }
+
+                AppScreen.MEDIA_ZIP_TOOLS -> {
+                    MediaAndZipToolsScreen()
                 }
 
                 AppScreen.ADMIN_DASHBOARD -> {

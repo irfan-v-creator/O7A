@@ -90,7 +90,7 @@ fun AdminDashboardScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabTitles = listOf("Inventory", "Orders & UPI", "Appointments")
+    val tabTitles = listOf("Inventory", "Orders & UPI", "Appointments", "Media & ZIP")
     var showAddProductDialog by remember { mutableStateOf(false) }
 
     val pendingPaymentsCount = orders.count { it.paymentStatus == "UNDER_REVIEW" }
@@ -265,6 +265,9 @@ fun AdminDashboardScreen(
                         }
                     }
                 }
+            }
+            3 -> {
+                MediaAndZipToolsScreen()
             }
         }
     }
