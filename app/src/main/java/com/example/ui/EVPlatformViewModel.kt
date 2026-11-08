@@ -40,6 +40,7 @@ enum class AppScreen {
     CALL_AND_VISIT,
     TRANSFER_HIGHER_DEPT,
     MONITORING_OPTIONS,
+    CUSTOMER_PROFILE,
     ADMIN_DASHBOARD
 }
 
@@ -48,6 +49,15 @@ enum class UserRole(val label: String) {
     SERVICE_STAFF("Service Center"),
     ADMIN("Admin / Inventory")
 }
+
+data class UserProfile(
+    val fullName: String = "Rahul Nair",
+    val phone: String = "+91 98470 12345",
+    val email: String = "rahul.nair@example.com",
+    val address: String = "Flat 4B, Skyline Ivy, Kakkanad, Kochi, Kerala - 682030",
+    val preferredScooter: String = "Ola S1 Pro Gen 2",
+    val isLoggedIn: Boolean = true
+)
 
 data class ScannerResult(
     val code: String,
@@ -59,6 +69,9 @@ data class ScannerResult(
 class EVPlatformViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: EVRepository
+
+    private val _userProfile = MutableStateFlow(UserProfile())
+    val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
 
     init {
         val db = AppDatabase.getInstance(application)
@@ -331,10 +344,37 @@ class EVPlatformViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun updateUserProfile(fullName: String, phone: String, email: String, address: String, scooter: String) {
+        _userProfile.value = _userProfile.value.copy(
+            fullName = fullName,
+            phone = phone,
+            email = email,
+            address = address,
+            preferredScooter = scooter
+        )
+    }
+
+    fun toggleUserLogin() {
+        val current = _userProfile.value.isLoggedIn
+        _userProfile.value = _userProfile.value.copy(isLoggedIn = !current)
+    }
+
     // --- ADMIN ACTIONS ---
     fun adminUpdateStock(productId: Long, newStock: Int) {
         viewModelScope.launch {
             repository.updateStock(productId, newStock)
+        }
+    }
+
+    fun adminAddProduct(product: ProductEntity) {
+        viewModelScope.launch {
+            repository.addProduct(product)
+        }
+    }
+
+    fun adminDeleteProduct(productId: Long) {
+        viewModelScope.launch {
+            repository.deleteProduct(productId)
         }
     }
 

@@ -29,6 +29,7 @@ import com.example.ui.screens.CallAndVisitScreen
 import com.example.ui.screens.CartScreen
 import com.example.ui.screens.CheckoutScreen
 import com.example.ui.screens.CustomerHubScreen
+import com.example.ui.screens.CustomerProfileScreen
 import com.example.ui.screens.DemoVideoScreen
 import com.example.ui.screens.MainHubScreen
 import com.example.ui.screens.MonitoringOptionsScreen
@@ -77,6 +78,7 @@ fun O7AApp(viewModel: EVPlatformViewModel = viewModel()) {
     val scannerResult by viewModel.scannerResult.collectAsState()
     val lastOrder by viewModel.lastCreatedOrder.collectAsState()
     val lastAppointment by viewModel.lastCreatedAppointment.collectAsState()
+    val userProfile by viewModel.userProfile.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -259,12 +261,27 @@ fun O7AApp(viewModel: EVPlatformViewModel = viewModel()) {
                     MonitoringOptionsScreen()
                 }
 
+                AppScreen.CUSTOMER_PROFILE -> {
+                    CustomerProfileScreen(
+                        profile = userProfile,
+                        onSaveProfile = { name, phone, email, address, scooter ->
+                            viewModel.updateUserProfile(name, phone, email, address, scooter)
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("Registration profile updated")
+                            }
+                        },
+                        onToggleLogin = { viewModel.toggleUserLogin() }
+                    )
+                }
+
                 AppScreen.ADMIN_DASHBOARD -> {
                     AdminDashboardScreen(
                         products = allProducts,
                         orders = allOrders,
                         appointments = allAppointments,
                         onUpdateStock = { id, stock -> viewModel.adminUpdateStock(id, stock) },
+                        onAddProduct = { viewModel.adminAddProduct(it) },
+                        onDeleteProduct = { viewModel.adminDeleteProduct(it) },
                         onVerifyPayment = { orderId, approved -> viewModel.adminVerifyPayment(orderId, approved) },
                         onUpdateOrderStatus = { orderId, status -> viewModel.adminUpdateOrderStatus(orderId, status) },
                         onUpdateAppointmentStatus = { id, status -> viewModel.adminUpdateAppointmentStatus(id, status) }

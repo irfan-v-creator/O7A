@@ -45,6 +45,10 @@ class EVRepository(private val database: AppDatabase) {
         return database.productDao().insertProduct(product)
     }
 
+    suspend fun deleteProduct(productId: Long) {
+        database.productDao().deleteProductById(productId)
+    }
+
     // --- VEHICLES (GARAGE) ---
     fun getAllVehicles(): Flow<List<VehicleEntity>> = database.vehicleDao().getAllVehicles()
 

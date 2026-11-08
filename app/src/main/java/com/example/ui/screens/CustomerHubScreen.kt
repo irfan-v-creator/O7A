@@ -159,7 +159,7 @@ fun CustomerHubScreen(
                     title = "registration",
                     icon = Icons.Default.Assignment,
                     testTag = "customer_tile_registration",
-                    onClick = { onNavigate(AppScreen.VEHICLE_GARAGE) },
+                    onClick = { onNavigate(AppScreen.CUSTOMER_PROFILE) },
                     modifier = Modifier.weight(1f)
                 )
             }

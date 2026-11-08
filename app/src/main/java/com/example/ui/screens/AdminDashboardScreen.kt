@@ -2,6 +2,8 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,12 +23,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -77,6 +82,8 @@ fun AdminDashboardScreen(
     orders: List<OrderEntity>,
     appointments: List<AppointmentEntity>,
     onUpdateStock: (Long, Int) -> Unit,
+    onAddProduct: (ProductEntity) -> Unit,
+    onDeleteProduct: (Long) -> Unit,
     onVerifyPayment: (String, Boolean) -> Unit,
     onUpdateOrderStatus: (String, String) -> Unit,
     onUpdateAppointmentStatus: (Long, String) -> Unit,
@@ -84,6 +91,7 @@ fun AdminDashboardScreen(
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabTitles = listOf("Inventory", "Orders & UPI", "Appointments")
+    var showAddProductDialog by remember { mutableStateOf(false) }
 
     val pendingPaymentsCount = orders.count { it.paymentStatus == "UNDER_REVIEW" }
     val lowStockCount = products.count { it.stockQty <= 10 }
@@ -185,12 +193,41 @@ fun AdminDashboardScreen(
         when (selectedTab) {
             0 -> {
                 // Tab 0: Inventory Management
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(products, key = { it.id }) { product ->
-                        AdminProductStockCard(
-                            product = product,
-                            onUpdateStock = { newStock -> onUpdateStock(product.id, newStock) }
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${products.size} Active Spare Parts",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = O7ATextSecondary
                         )
+
+                        Button(
+                            onClick = { showAddProductDialog = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = O7AElectricBlue),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.testTag("admin_add_product_button")
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Add Part", fontSize = 12.sp)
+                        }
+                    }
+
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(products, key = { it.id }) { product ->
+                            AdminProductStockCard(
+                                product = product,
+                                onUpdateStock = { newStock -> onUpdateStock(product.id, newStock) },
+                                onDeleteProduct = { onDeleteProduct(product.id) }
+                            )
+                        }
                     }
                 }
             }
@@ -231,6 +268,185 @@ fun AdminDashboardScreen(
             }
         }
     }
+
+    if (showAddProductDialog) {
+        var partName by remember { mutableStateOf("") }
+        var sku by remember { mutableStateOf("O7A-") }
+        var category by remember { mutableStateOf("Brakes") }
+        var priceText by remember { mutableStateOf("") }
+        var stockText by remember { mutableStateOf("10") }
+        var compatibleModels by remember { mutableStateOf("Ola S1 Pro,Ather 450X") }
+        var barcode by remember { mutableStateOf("890" + kotlin.random.Random.nextInt(10000000, 99999999).toString()) }
+        var desc by remember { mutableStateOf("Certified OEM EV Spare Part") }
+
+        AlertDialog(
+            onDismissRequest = { showAddProductDialog = false },
+            containerColor = O7ASurfaceNavy,
+            title = {
+                Text(
+                    text = "Add New EV Spare Part",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = O7ATextPrimary
+                )
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+                    OutlinedTextField(
+                        value = partName,
+                        onValueChange = { partName = it },
+                        label = { Text("Part Name") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = O7ADeepNavy,
+                            unfocusedContainerColor = O7ADeepNavy,
+                            focusedBorderColor = O7ACyanGlow,
+                            unfocusedBorderColor = O7ACardBorder,
+                            focusedTextColor = O7ATextPrimary,
+                            unfocusedTextColor = O7ATextPrimary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = sku,
+                        onValueChange = { sku = it },
+                        label = { Text("Part SKU") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = O7ADeepNavy,
+                            unfocusedContainerColor = O7ADeepNavy,
+                            focusedBorderColor = O7ACyanGlow,
+                            unfocusedBorderColor = O7ACardBorder,
+                            focusedTextColor = O7ATextPrimary,
+                            unfocusedTextColor = O7ATextPrimary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = category,
+                        onValueChange = { category = it },
+                        label = { Text("Category (Brakes, Powertrain, Electrical...)") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = O7ADeepNavy,
+                            unfocusedContainerColor = O7ADeepNavy,
+                            focusedBorderColor = O7ACyanGlow,
+                            unfocusedBorderColor = O7ACardBorder,
+                            focusedTextColor = O7ATextPrimary,
+                            unfocusedTextColor = O7ATextPrimary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = priceText,
+                            onValueChange = { priceText = it },
+                            label = { Text("Price (₹)") },
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = O7ADeepNavy,
+                                unfocusedContainerColor = O7ADeepNavy,
+                                focusedBorderColor = O7ACyanGlow,
+                                unfocusedBorderColor = O7ACardBorder,
+                                focusedTextColor = O7ATextPrimary,
+                                unfocusedTextColor = O7ATextPrimary
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        OutlinedTextField(
+                            value = stockText,
+                            onValueChange = { stockText = it },
+                            label = { Text("Initial Stock") },
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = O7ADeepNavy,
+                                unfocusedContainerColor = O7ADeepNavy,
+                                focusedBorderColor = O7ACyanGlow,
+                                unfocusedBorderColor = O7ACardBorder,
+                                focusedTextColor = O7ATextPrimary,
+                                unfocusedTextColor = O7ATextPrimary
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    OutlinedTextField(
+                        value = compatibleModels,
+                        onValueChange = { compatibleModels = it },
+                        label = { Text("Compatible Models") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = O7ADeepNavy,
+                            unfocusedContainerColor = O7ADeepNavy,
+                            focusedBorderColor = O7ACyanGlow,
+                            unfocusedBorderColor = O7ACardBorder,
+                            focusedTextColor = O7ATextPrimary,
+                            unfocusedTextColor = O7ATextPrimary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = barcode,
+                        onValueChange = { barcode = it },
+                        label = { Text("Barcode Number") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = O7ADeepNavy,
+                            unfocusedContainerColor = O7ADeepNavy,
+                            focusedBorderColor = O7ACyanGlow,
+                            unfocusedBorderColor = O7ACardBorder,
+                            focusedTextColor = O7ATextPrimary,
+                            unfocusedTextColor = O7ATextPrimary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val priceVal = priceText.toDoubleOrNull() ?: 500.0
+                        val stockVal = stockText.toIntOrNull() ?: 10
+                        if (partName.isNotBlank() && sku.isNotBlank()) {
+                            onAddProduct(
+                                ProductEntity(
+                                    sku = sku.trim(),
+                                    name = partName.trim(),
+                                    category = category.trim(),
+                                    price = priceVal,
+                                    stockQty = stockVal,
+                                    isAvailable = true,
+                                    description = desc,
+                                    compatibleModels = compatibleModels,
+                                    barcode = barcode.trim()
+                                )
+                            )
+                            showAddProductDialog = false
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = O7ASuccessGreen)
+                ) {
+                    Text("Save to Catalog")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddProductDialog = false }) {
+                    Text("Cancel", color = O7ATextSecondary)
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -258,7 +474,8 @@ fun AdminMetricPill(
 @Composable
 fun AdminProductStockCard(
     product: ProductEntity,
-    onUpdateStock: (Int) -> Unit
+    onUpdateStock: (Int) -> Unit,
+    onDeleteProduct: () -> Unit
 ) {
     Surface(
         shape = RoundedCornerShape(12.dp),
@@ -317,6 +534,18 @@ fun AdminProductStockCard(
                         .background(O7ADeepNavy)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Increase", tint = O7ACyanGlow, modifier = Modifier.size(14.dp))
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                IconButton(
+                    onClick = onDeleteProduct,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF450A0A))
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete Part", tint = Color(0xFFFCA5A5), modifier = Modifier.size(14.dp))
                 }
             }
         }
